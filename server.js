@@ -79,6 +79,24 @@ app.get('/fruits/new', (req, res) => {
     res.render('fruits/new')
 })
 // CREATE route -> POST route that actually calls the db and makes a new document
+app.post('/fruits', (req, res) => {
+    // check if the readyToEat property should be true or false
+    // we can check AND set this property in one line of code
+    // first part sets the property name
+    // second is a ternary to the value
+    req.body.readyToEat = req.body.readyToEat === 'on' ? true : false
+    console.log('this is the fruit to create', req.body);
+    // now we're ready for mongoose to do its thing
+    Fruit.create(req.body)
+        .then(data => {
+            console.log('this was returned from create', data);
+            res.redirect('/fruits')
+        })
+        .catch(error => {
+            console.log(error)
+            res.json({ error })
+        })
+})
 
 // SHOW route
 app.get('/fruits/:id', (req, res) => {

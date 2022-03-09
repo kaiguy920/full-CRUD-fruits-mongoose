@@ -5,6 +5,7 @@
 <!-- here we start our block content -->
 {% block content %}
 <div>
+    <a href="/fruits/new">Create New Fruit</a>
     {% for fruit in fruits %}
 <article>
     <a href="/fruits/{{ fruit.id }}">
