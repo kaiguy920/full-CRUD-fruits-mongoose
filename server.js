@@ -74,6 +74,12 @@ app.get('/fruits', (req, res) => {
         })
 })
 
+// NEW route -> GET route that renders our page with the form
+app.get('/fruits/new', (req, res) => {
+    res.render('fruits/new')
+})
+// CREATE route -> POST route that actually calls the db and makes a new document
+
 // SHOW route
 app.get('/fruits/:id', (req, res) => {
     // first, we need to get the id
