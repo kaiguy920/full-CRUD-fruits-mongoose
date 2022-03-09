@@ -115,6 +115,23 @@ app.get('/fruits/:id', (req, res) => {
         })
 })
 
+// DELETE route
+app.delete('/fruits/:id', (req, res) => {
+    // get the fruit id
+    const fruitId = req.params.id
+    // delete the fruit
+    Fruit.findByIdAndRemove(fruitId)
+        .then(fruit => {
+            console.log('this is the response from FBID', fruit);
+            res.redirect('/fruits')
+        })
+        // if there's an error, show that instead
+        .catch(err => {
+            console.log(err)
+            res.json({ err })
+        })
+})
+
 // =============================================================
 //                         SERVER LISTENER
 // =============================================================
