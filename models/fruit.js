@@ -12,7 +12,6 @@ const mongoose = require('./connection')
 const { Schema, model } = mongoose
 
 // make our fruits Schema
-
 const fruitSchema = new Schema({
     name: { type: String },
     color: { type: String },
