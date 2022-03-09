@@ -88,8 +88,8 @@ app.post('/fruits', (req, res) => {
     console.log('this is the fruit to create', req.body);
     // now we're ready for mongoose to do its thing
     Fruit.create(req.body)
-        .then(data => {
-            console.log('this was returned from create', data);
+        .then(fruit => {
+            // console.log('this was returned from create', fruit);
             res.redirect('/fruits')
         })
         .catch(error => {
@@ -97,6 +97,43 @@ app.post('/fruits', (req, res) => {
             res.json({ error })
         })
 })
+// EDIT route -> GET that takes us to the edit form view
+app.get('/fruits/:id/edit', (req, res) => {
+    // we need to get the id 
+    const fruitId = req.params.id
+    // find the fruit- have to define each route
+    Fruit.findById(fruitId)
+        // --> render if there is a fruit
+        .then(fruit => {
+            res.render('fruits/edit', { fruit })
+        })
+        // -->error if no fruit
+        .catch(err => {
+            console.log(err)
+            res.json({ err })
+        })
+})
+
+// UPDATE route -> sends a put request to our database
+app.put('/fruits/:id', (req, res) => {
+    // get the id
+    const fruitId = req.params.id
+    // check & assign the readyToEat property with the correct value
+    req.body.readyToEat = req.body.readyToEat === 'on' ? true : false
+    // tell mongoose to update the fruit
+    Fruit.findByIdAndUpdate(fruitId, req.body, { new: true })
+        // if successful -> redirect to teh fruit page
+        .then(fruit => {
+            console.log('the updated fruit', fruit);
+            res.redirect(`/fruits/${fruit._id}`)
+        })
+        // if an error, display that
+        .catch(err => {
+            console.log(err)
+            res.json({ err })
+        })
+})
+
 
 // SHOW route
 app.get('/fruits/:id', (req, res) => {
