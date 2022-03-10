@@ -11,6 +11,9 @@ const methodOverride = require("method-override")
 // now that we're using controllers as the should be used, we need to require our routers
 const FruitRouter = require('./controllers/fruit')
 const UserRouter = require('./controllers/user')
+// session middleware requirements
+const session = require('express-session')
+const MongoStore = require('connect-mongo')
 
 // =============================================================
 //           CREATE OUR EXPRESS APPLICATION OBJECT
@@ -28,6 +31,15 @@ app.use(methodOverride('_method'))
 app.use(express.urlencoded({ extended: false }))
 // to serve files from public statically
 app.use(express.static('public'))
+// this is the middleware to set up a session
+app.use(
+    session({
+        secret: process.env.SECRET,
+        store: MongoStore.create({ mongoUrl: process.env.DATABASE_URL }),
+        saveUninitialized: true,
+        resave: false
+    })
+)
 
 
 // =============================================================
