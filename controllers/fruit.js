@@ -9,19 +9,36 @@ const Fruit = require('../models/fruit')
 // =============================================================
 const router = express.Router()
 
+// =============================================================
+//                         ROUTER MIDDLEWARE
+// =============================================================
+// create some middleware to protext these routes
+// Authorization middleware
+router.use((req, res, next) => {
+    // checking the loggedin boolean of our session
+    if (req.session.loggedIn) {
+        // if they're logged in go to the next thing(that's the controller)
+        next()
+    } else {
+        // if they're not logged in, send them to the login page
+        res.redirect('/user/login')
+    }
+})
 
 // =============================================================
 //                          ROUTES
 // =============================================================
 
-// INDEX route
+// INDEX  of ALL fruits route
 router.get('/', (req, res) => {
     // find the fruits
     Fruit.find({})
         // then render a template AFTER they're found
         .then(fruits => {
+            const username = req.session.username
+            const loggedIn = req.session.loggedIn
             console.log(fruits)
-            res.render('fruits/index.liquid', { fruits })
+            res.render('fruits/index.liquid', { fruits, username, loggedIn })
         })
         // show an error if there is one
         .catch(error => {
@@ -30,9 +47,29 @@ router.get('/', (req, res) => {
         })
 })
 
-// NEW route -> GET route that renders our page with the form
+// index that shows only the user's fruits
+router.get('/mine', (req, res) => {
+    // find the fruits
+    Fruit.find({ username: req.session.username })
+        // then render a template AFTER they're found
+        .then((fruits) => {
+            const username = req.session.username
+            const loggedIn = req.session.loggedIn
+            // console.log(fruits)
+            res.render('fruits/index', { fruits, username, loggedIn })
+        })
+        // show an error if there is one
+        .catch((error) => {
+            console.log(error)
+            res.json({ error })
+        })
+})
+
+// new route -> GET route that renders our page with the form
 router.get('/new', (req, res) => {
-    res.render('fruits/new')
+    const username = req.session.username
+    const loggedIn = req.session.loggedIn
+    res.render('fruits/new', { username, loggedIn })
 })
 // CREATE route -> POST route that actually calls the db and makes a new document
 router.post('/', (req, res) => {
@@ -43,16 +80,19 @@ router.post('/', (req, res) => {
     req.body.readyToEat = req.body.readyToEat === 'on' ? true : false
     console.log('this is the fruit to create', req.body);
     // now we're ready for mongoose to do its thing
+    // now that we have user specific fruits, we'll add the username to the fruit created
+    req.body.username = req.session.username
     Fruit.create(req.body)
-        .then(fruit => {
-            // console.log('this was returned from create', fruit);
+        .then((fruit) => {
+            console.log('this was returned from create', fruit)
             res.redirect('/fruits')
         })
-        .catch(error => {
-            console.log(error)
-            res.json({ error })
+        .catch((err) => {
+            console.log(err)
+            res.json({ err })
         })
 })
+
 // EDIT route -> GET that takes us to the edit form view
 router.get('/:id/edit', (req, res) => {
     // we need to get the id 
@@ -61,7 +101,9 @@ router.get('/:id/edit', (req, res) => {
     Fruit.findById(fruitId)
         // --> render if there is a fruit
         .then(fruit => {
-            res.render('fruits/edit', { fruit })
+            const username = req.session.username
+            const loggedIn = req.session.loggedIn
+            res.render('fruits/edit', { fruit, username, loggedIn })
         })
         // -->error if no fruit
         .catch(err => {
@@ -99,7 +141,9 @@ router.get('/:id', (req, res) => {
     Fruit.findById(fruitId)
         // once found, we can render a view with the data
         .then(fruit => {
-            res.render('fruits/show', { fruit })
+            const username = req.session.username
+            const loggedIn = req.session.loggedIn
+            res.render('fruits/show', { fruit, username, loggedIn })
         })
         // if there's an error, show that instead
         .catch(err => {
